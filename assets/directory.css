@@ -1,0 +1,106 @@
+/**
+ * Attention Directory - Frontend Styles
+ *
+ * This file implements the "Styling Contract" using CSS variables.
+ * Users can override these variables in their theme's custom CSS.
+ * 
+ * Includes default styles for JetEngine specific output.
+ */
+
+:root {
+    /* Main API driven Tenant Tokens */
+    --tenant-accent: #0f172a;
+    --tenant-muted: #64748b;
+    --tenant-radius: 0.5rem;
+    --tenant-gap: 1rem;
+
+    /* Semantic Status / Accents Defaults */
+    --tenant-rating-color: #f59e0b;
+    --tenant-badge-open-bg: rgba(16, 185, 129, 0.1);
+    --tenant-badge-open-text: #059669;
+    --tenant-badge-closed-bg: rgba(239, 68, 68, 0.1);
+    --tenant-badge-closed-text: #dc2626;
+
+    /* Category Pill Defaults */
+    --tenant-tag-bg: #f1f5f9;
+    --tenant-tag-text: #475569;
+}
+
+/* Base Styles */
+.attention-directory-container {
+    padding: var(--tenant-gap) 0;
+}
+
+/* 
+ * -----------------------------------------------------------------------------
+ * JetEngine Output Formatter Styles
+ * 
+ * Semantic classes emitted by JetEngine custom data layout callbacks.
+ * -----------------------------------------------------------------------------
+ */
+
+/* Ratings */
+.attention-rating {
+    color: var(--tenant-rating-color);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Generic Icon Size/Spacing */
+.attention-icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
+}
+
+/* Distance */
+.attention-distance {
+    color: var(--tenant-muted);
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Open/Closed Badge */
+.attention-status {
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--tenant-radius);
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+}
+
+.attention-status-open {
+    background-color: var(--tenant-badge-open-bg);
+    color: var(--tenant-badge-open-text);
+}
+
+.attention-status-closed {
+    background-color: var(--tenant-badge-closed-bg);
+    color: var(--tenant-badge-closed-text);
+}
+
+/* Categories - Tags/Pills */
+.attention-category-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.attention-tag {
+    background-color: var(--tenant-tag-bg);
+    color: var(--tenant-tag-text);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--tenant-radius);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.attention-categories-plain {
+    color: var(--tenant-muted);
+    font-size: 0.875rem;
+}
