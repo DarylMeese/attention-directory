@@ -3,7 +3,7 @@
  * Plugin Name: Attention Network Directory
  * Plugin URI: https://attentionnetwork.com
  * Description: Secure, stylable directory system integrated with Attention Network API.
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author: Attention Network
  * Author URI: https://attentionnetwork.com
  * License: GPLv2 or later
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define constants.
-define('ATTENTION_DIRECTORY_VERSION', '1.1.1');
+define('ATTENTION_DIRECTORY_VERSION', '1.1.2');
 define('ATTENTION_DIRECTORY_PATH', plugin_dir_path(__FILE__));
 define('ATTENTION_DIRECTORY_URL', plugin_dir_url(__FILE__));
 define('ATTENTION_DIRECTORY_BASENAME', plugin_basename(__FILE__));

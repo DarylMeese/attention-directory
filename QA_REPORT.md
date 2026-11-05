@@ -22,3 +22,9 @@ Local validation:
 - The optional WordPress PHPUnit fixtures were corrected to the canonical shapes/function names but are not claimed executed without a native WP test harness.
 
 Real WordPress installation/browser acceptance and any native JetEngine-builder checks are separate evidence, pending the coordinating agent. The release ZIP excludes tests, IDE stubs, Git metadata and local QA artifacts. No provider credentials were read, no external notifications were sent, and no live site was changed by this local review.
+
+## Clear-filter recovery — 1.1.2
+
+The native category empty state exposed a navigation gap: search retained the selected category but offered no way to reset it. The search shortcode now shows **Clear filters** when directory filters, profile selection or pagination are present. It removes only the explicit directory query-key allowlist, preserving WordPress `page_id`/`p` and unrelated host-page parameters. Both canonical `radius_mi` and the legacy `radius` name are cleared. Zero coordinates remain active; blank filters do not create an unnecessary control. The link wraps with the search form and retains a 44-pixel keyboard-accessible target.
+
+Local validation: **87 PHP contract/rendering assertions**, **11 Node UI assertions**, all **11 PHP syntax checks**, production JavaScript syntax, and whitespace checks pass. The added regressions cover every removable key and preservation of plain-permalink/unrelated query parameters. Native empty-category → clear → populated-listing verification is recorded after installation below.

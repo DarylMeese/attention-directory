@@ -246,6 +246,15 @@ function attention_directory_search_shortcode($atts)
     ), $atts, 'attention_search');
 
     $current_q = isset($_GET['q']) && is_scalar($_GET['q']) ? sanitize_text_field(wp_unslash($_GET['q'])) : '';
+    // Clear only directory state; plain-permalink routing and host-page parameters survive.
+    $filter_keys = array('q', 'category', 'city', 'state', 'zip', 'postal_code', 'sort', 'lat', 'lng', 'radius', 'radius_mi', 'attn_page', 'org_slug');
+    $has_filters = false;
+    foreach ($filter_keys as $filter) {
+        if (isset($_GET[$filter]) && ((is_scalar($_GET[$filter]) && trim((string) $_GET[$filter]) !== '') || (is_array($_GET[$filter]) && !empty($_GET[$filter])))) {
+            $has_filters = true;
+            break;
+        }
+    }
 
     ob_start();
     ?>
@@ -262,6 +271,9 @@ function attention_directory_search_shortcode($atts)
             value="<?php echo esc_attr($current_q); ?>" style="flex: 1; padding: 0.5rem;" />
         <button type="submit" class="button"
             style="padding: 0.5rem 1rem;"><?php esc_html_e('Search', 'attention-directory'); ?></button>
+        <?php if ($has_filters): ?>
+            <a class="attention-clear-filters" href="<?php echo esc_url(remove_query_arg($filter_keys)); ?>"><?php esc_html_e('Clear filters', 'attention-directory'); ?></a>
+        <?php endif; ?>
     </form>
     <?php
     return ob_get_clean();

@@ -38,7 +38,9 @@
 .attention-pagination { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: 1rem; }
 .attention-search-form { flex-wrap: wrap; }
 .attention-search-form input { min-width: 0; max-width: 100%; }
-.attention-search-form button, .attention-button, .attention-pagination a, .attention-push-button { min-height: 44px; padding: .65rem 1rem; }
+.attention-search-form button, .attention-clear-filters, .attention-button, .attention-pagination a, .attention-push-button { min-height: 44px; padding: .65rem 1rem; }
+.attention-search-form { flex-wrap: wrap; align-items: center; }
+.attention-clear-filters { display: inline-flex; align-items: center; white-space: nowrap; }
 .attention-directory-container a:focus-visible, .attention-search-form :focus-visible, .attention-push-button:focus-visible { outline: 3px solid var(--attention-accent); outline-offset: 3px; }
 .attention-profile { overflow-wrap: anywhere; }
 .attention-profile img, .attention-card img { max-width: 100%; height: auto; }

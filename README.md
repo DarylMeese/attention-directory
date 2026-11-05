@@ -1,6 +1,6 @@
 # Attention Directory for WordPress
 
-Version **1.1.1**. Requires WordPress 6.5+ and PHP 7.4+.
+Version **1.1.2**. Requires WordPress 6.5+ and PHP 7.4+.
 
 Display an Attention site/app's public business directory inside WordPress. Organization privacy, site membership and listing eligibility remain controlled by the platform. This plugin provides public reads; it does not provide organization administration or require an administrator API token.
 
