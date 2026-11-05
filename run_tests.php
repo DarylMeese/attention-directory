@@ -84,6 +84,19 @@ check(Attention_Directory_Block_Bindings::get_organization_binding_value(array('
 check(Attention_Directory_Block_Bindings::get_organization_binding_value(array('field'=>'rating_average'),(object)array('context'=>array('attentionOrganizationSlug'=>'test-org')),'content')==='4.3','rating binding');
 check(Attention_Directory_Block_Bindings::get_organization_binding_value(array('field'=>'locations'),(object)array('context'=>array('attentionOrganizationSlug'=>'test-org')),'content')===null,'unsupported array binding returns null');
 check(strpos(attention_directory_org_shortcode(array('slug'=>'test-org')),'Real public name')!==false,'profile shortcode actual contract');
+foreach (array(array(), array('primaryPhone'=>' ', 'primaryEmail'=>'', 'websiteUrl'=>null)) as $empty_contacts) {
+    $profile=$canonical; unset($profile['primaryPhone'], $profile['primaryEmail'], $profile['websiteUrl']);
+    upstream(array('profile'=>array_merge($profile,$empty_contacts)));
+    $html=attention_directory_org_shortcode(array('slug'=>'test-org'));
+    check(strpos($html,'Real public name')!==false && strpos($html,'attention-profile-contact')===false,'empty contact panel omitted while profile remains readable');
+}
+foreach (array('primaryPhone'=>'555-0100', 'primaryEmail'=>'qa@example.invalid', 'websiteUrl'=>'https://example.invalid') as $field=>$value) {
+    $profile=$canonical; unset($profile['primaryPhone'], $profile['primaryEmail'], $profile['websiteUrl']);
+    $profile[$field]=$value; upstream(array('profile'=>$profile));
+    $html=attention_directory_org_shortcode(array('slug'=>'test-org'));
+    check(strpos($html,'attention-profile-contact')!==false && strpos($html,$value)!==false,'a single real contact preserves the contact panel');
+}
+upstream(array('profile'=>$canonical));
 $_GET=array('org_slug'=>'test-org');check(strpos(attention_directory_listing_shortcode(array()),'Back to directory')!==false,'listing supports same-page profile navigation');$_GET=array();
 upstream(array('categories'=>array(array('slug'=>'coffee','name'=>'Coffee','count'=>2))));$cats=Attention_Directory_API_Proxy::get_categories(request_for('/categories'));check($cats->data['items'][0]['name']==='Coffee','actual categories envelope');check(strpos(end($requests)['url'],'/directory/categories')!==false,'canonical categories route');check(strpos(attention_directory_categories_shortcode(array()),'category=coffee')!==false,'category links filter actual directory');
 upstream(array('collection'=>array('collectionId'=>'public','title'=>'Coffee','criteria'=>array('PRIVATE'),'items'=>array($canonical))));$collection=Attention_Directory_API_Proxy::get_collection(request_for('/collections/coffee'));check($collection->data['items'][0]['name']==='Real public name','collection items normalized');check(!isset($collection->data['collection']['criteria']),'collection internal criteria not exposed');

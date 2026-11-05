@@ -32,7 +32,7 @@
     --tenant-tag-bg: #f1f5f9;
     --tenant-tag-text: #475569;
 }
-.attention-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)) !important; }
+.attention-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)) !important; }
 .attention-card { background: var(--attention-card-bg); color: var(--attention-text-main); border-color: var(--attention-card-border) !important; border-radius: var(--attention-card-radius) !important; overflow-wrap: anywhere; }
 .attention-card p { color: var(--attention-text-muted) !important; }
 .attention-pagination { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: 1rem; }

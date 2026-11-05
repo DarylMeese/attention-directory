@@ -160,6 +160,7 @@ function attention_directory_org_shortcode($atts)
             </div>
         <?php endif; ?>
 
+        <?php if (array_filter(array($org['primaryPhone'] ?? '', $org['primaryEmail'] ?? '', $org['websiteUrl'] ?? ''), function ($value) { return is_string($value) && trim($value) !== ''; })): ?>
         <div class="attention-profile-contact" style="background: #f9f9f9; padding: 1.5rem; border-radius: 8px;">
             <h3 style="margin-top: 0;"><?php esc_html_e('Contact Information', 'attention-directory'); ?></h3>
             <ul style="list-style: none; padding: 0; margin: 0;">
@@ -180,6 +181,7 @@ function attention_directory_org_shortcode($atts)
                 <?php endif; ?>
             </ul>
         </div>
+        <?php endif; ?>
     </div>
     <?php
     return ob_get_clean();
