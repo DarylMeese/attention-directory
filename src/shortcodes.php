@@ -249,6 +249,12 @@ function attention_directory_search_shortcode($atts)
     ?>
     <form method="get" class="attention-search-form <?php echo esc_attr($atts['class']); ?>"
         style="display: flex; gap: 0.5rem;">
+        <?php foreach (array('category', 'city', 'state', 'zip', 'postal_code', 'sort', 'lat', 'lng', 'radius_mi', 'page_id', 'p') as $preserved): ?>
+            <?php if (isset($_GET[$preserved]) && is_scalar($_GET[$preserved])): ?>
+                <input type="hidden" name="<?php echo esc_attr($preserved); ?>" value="<?php echo esc_attr(sanitize_text_field(wp_unslash($_GET[$preserved]))); ?>" />
+            <?php endif; ?>
+        <?php endforeach; ?>
+        <input type="hidden" name="attn_page" value="1" />
         <label class="screen-reader-text" for="<?php echo esc_attr($search_id = wp_unique_id('attention-search-')); ?>"><?php esc_html_e('Search the directory', 'attention-directory'); ?></label>
         <input type="search" id="<?php echo esc_attr($search_id); ?>" name="q" maxlength="100" placeholder="<?php echo esc_attr($atts['placeholder']); ?>"
             value="<?php echo esc_attr($current_q); ?>" style="flex: 1; padding: 0.5rem;" />

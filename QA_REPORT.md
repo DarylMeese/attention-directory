@@ -16,7 +16,7 @@ Confirmed repairs:
 
 Local validation:
 
-- `php run_tests.php`: **62 contract/rendering assertions passed** using canonical-shaped HTTP fixtures and WordPress stubs, with PHP warnings converted to failures.
+- `php run_tests.php`: **65 contract/rendering assertions passed** using canonical-shaped HTTP fixtures and WordPress stubs, with PHP warnings converted to failures. This includes plain-permalink WordPress page routing, active filters and resetting profile/page selection when searching.
 - `node run_push_tests.cjs`: **11 notification UI/native HTML pattern assertions passed**; no provider requests or permission prompts.
 - PHP syntax checks pass for all plugin and test PHP files; JavaScript syntax check passes.
 - The optional WordPress PHPUnit fixtures were corrected to the canonical shapes/function names but are not claimed executed without a native WP test harness.
