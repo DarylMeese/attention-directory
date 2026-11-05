@@ -1,38 +1,20 @@
-# JetEngine Integration Guide
+# JetEngine integration
 
-The Attention Directory plugin provides same-origin REST API endpoints optimized for **JetEngine (Crocoblock)**. This allows you to build custom listings and search filters using JetEngine's UI while keeping your API secrets secure.
+Configure the plugin's API URL and site/app slug first. The same-origin endpoints contain only that site's public directory data; no browser authorization header is needed.
 
-## 1. Setup API Connection
+In the installed JetEngine version's REST API listing/query setup, use:
 
-1. Go to **JetEngine > Extensions** and ensure **REST API Listings** is enabled.
-2. Go to **JetEngine > REST API Directives**.
-3. Add New Endpoint:
-   - **Name**: `Attention Listing`
-   - **API Endpoint URL**: `https://your-site.com/wp-json/attention/v1/listing`
-   - **Authorization**: None (WordPress handles this server-side via our proxy).
-   - **Items Path**: Leave empty or use `items` (depending on our normalized shape).
+| Purpose | Endpoint | Items path |
+|---|---|---|
+| Business cards | `https://your-site.com/wp-json/attention/v1/organizations` | `items` |
+| One business | `https://your-site.com/wp-json/attention/v1/organizations/business-slug` | `item` |
+| Categories | `https://your-site.com/wp-json/attention/v1/categories` | `items` |
+| Collection businesses | `https://your-site.com/wp-json/attention/v1/collections/collection-slug` | `items` |
 
-## 2. Setup Query Builder
+Use `name`, `summary`, `logoUrl`, `rating_average`, `rating_count`, `distance_mi`, `is_open` and `categories` for dynamic fields. Map search controls to `q` (the proxy also accepts `search` as an alias), `category`, `city`, `state` or other documented public filters. Use `page` and `page_size` for REST pagination; inspect `paging.total_items` and `paging.total_pages`.
 
-1. Go to **JetEngine > Query Builder**.
-2. Add New:
-   - **Query Type**: `REST API Query`.
-   - **Endpoint**: Choose `Attention Listing`.
-   - **Custom Body/Query**: Map your JetEngine filters (Facets) to the Attention API query params (e.g., `search`, `category`).
+Available callbacks include rating stars, distance text/icon, open/closed status, category pills and category text. Unknown ratings, distances and hours remain unknown rather than appearing as zero miles, a false rating or a closed business. Icons use safe text markup retained by WordPress's normal HTML sanitizer.
 
-## 3. Create Listing Template
+Do not use the old undocumented `/listing` or `/navigation` URLs: those routes do not exist in this plugin. Do not configure a private management endpoint or administrator bearer token in a frontend listing. Disable third-party caching of these public responses when membership/privacy changes must be reflected immediately.
 
-1. Go to **JetEngine > Listings**.
-2. Add New:
-   - **Listing Source**: `REST API Endpoint`.
-   - **REST API Endpoint**: `Attention Listing`.
-3. Design your card using Gutenberg or Elementor. Use **Dynamic Field** widgets to map to Attention fields:
-   - `displayName`
-   - `tagline`
-   - `coverImageUrl` (use as callback for images)
-
-## 4. Render Grid
-
-1. Use the **Listing Grid** widget/block.
-2. Select your `Attention Listing` template.
-3. Enable **Lazy Load** if you have many organizations.
+JetEngine menu names and pagination mapping vary by version. The dependency-free PHP runner verifies callback/DTO behavior; an installed JetEngine walkthrough must be recorded separately before claiming native builder acceptance.

@@ -16,7 +16,7 @@ class AttentionDirectoryBlockBindingsTest extends WP_UnitTestCase
             if (strpos($url, '/organizations/test-org') !== false) {
                 return array(
                     'response' => array('code' => 200),
-                    'body' => wp_json_encode(array('name' => 'Bound Org Name', 'ratingAverage' => 4.3))
+                    'body' => wp_json_encode(array('profile' => array('organizationId' => 'test-id', 'slug' => 'test-org', 'displayName' => 'Bound Org Name', 'ratingAverage' => 4.3, 'ratingCount' => 2)))
                 );
             }
             return false;

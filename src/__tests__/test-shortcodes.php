@@ -13,25 +13,25 @@ class AttentionDirectoryShortcodesTest extends WP_UnitTestCase
     {
         // Mock WP_Http response
         add_filter('pre_http_request', function ($preempt, $parsed_args, $url) {
-            if (strpos($url, '/directory/navigation') !== false) {
+            if (strpos($url, '/directory/categories') !== false) {
                 return array(
                     'response' => array('code' => 200),
-                    'body' => wp_json_encode(array('navigation' => array('categories' => array(array('slug' => 'test-cat', 'name' => 'Test Category')))))
+                    'body' => wp_json_encode(array('categories' => array(array('slug' => 'test-cat', 'name' => 'Test Category'))))
                 );
             }
             return false;
         }, 10, 3);
 
-        $output = attention_categories_shortcode(array());
+        $output = attention_directory_categories_shortcode(array());
         $this->assertStringContainsString('Test Category', $output);
         $this->assertStringContainsString('href=', $output);
     }
 
     public function test_search_shortcode_renders()
     {
-        $output = attention_search_shortcode(array());
+        $output = attention_directory_search_shortcode(array());
         $this->assertStringContainsString('<form', $output);
         $this->assertStringContainsString('type="search"', $output);
-        $this->assertStringContainsString('name="search"', $output);
+        $this->assertStringContainsString('name="q"', $output);
     }
 }

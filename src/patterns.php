@@ -55,7 +55,7 @@ class Attention_Directory_Patterns
         <p><strong>Phone:</strong> </p>
         <!-- /wp:paragraph -->
         <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"attention-directory/organization","args":{"field":"phone"}}}}} -->
-        <p>123-456-7890</p>
+        <p>Phone not provided</p>
         <!-- /wp:paragraph -->
     </div>
     <!-- /wp:group -->

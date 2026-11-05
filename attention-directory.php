@@ -3,7 +3,7 @@
  * Plugin Name: Attention Network Directory
  * Plugin URI: https://attentionnetwork.com
  * Description: Secure, stylable directory system integrated with Attention Network API.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Attention Network
  * Author URI: https://attentionnetwork.com
  * License: GPLv2 or later
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define constants.
-define('ATTENTION_DIRECTORY_VERSION', '1.0.0');
+define('ATTENTION_DIRECTORY_VERSION', '1.1.0');
 define('ATTENTION_DIRECTORY_PATH', plugin_dir_path(__FILE__));
 define('ATTENTION_DIRECTORY_URL', plugin_dir_url(__FILE__));
 define('ATTENTION_DIRECTORY_BASENAME', plugin_basename(__FILE__));
@@ -62,7 +62,7 @@ function attention_directory_enqueue_assets()
     );
 
     $push_app_id = get_option('attention_directory_push_app_id');
-    if (!empty($push_app_id)) {
+    if (get_option('attention_directory_push_enabled', false) && is_string($push_app_id) && preg_match('/^[A-Za-z0-9_-]{8,128}$/', $push_app_id)) {
         wp_enqueue_script(
             'attention-push-client',
             'https://cdn.gravitec.net/storage/' . esc_attr($push_app_id) . '/client.js',
@@ -70,6 +70,8 @@ function attention_directory_enqueue_assets()
             null,
             true
         );
+        wp_add_inline_script('attention-push-client', "window.Gravitec=window.Gravitec||[];window.Gravitec.push(['init',{autoRegister:false}]);", 'before');
+        wp_enqueue_script('attention-directory-push', ATTENTION_DIRECTORY_URL . 'assets/push.js', array('attention-push-client'), ATTENTION_DIRECTORY_VERSION, true);
     }
 }
 
@@ -79,6 +81,6 @@ function attention_directory_enqueue_assets()
 register_activation_hook(__FILE__, function () {
     // Initialize default settings if they don't exist
     if (!get_option('attention_directory_base_url')) {
-        update_option('attention_directory_base_url', 'https://api.attentionnetwork.com');
+        update_option('attention_directory_base_url', 'https://app.attentionnetwork.net/api');
     }
 });

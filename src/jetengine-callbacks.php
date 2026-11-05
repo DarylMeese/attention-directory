@@ -51,7 +51,7 @@ function attention_directory_maybe_decode($data)
  */
 function attention_render_stars($rating)
 {
-    if (empty($rating) || !is_numeric($rating)) {
+    if (!is_numeric($rating) || (float) $rating <= 0 || (float) $rating > 5) {
         return '';
     }
 
@@ -61,7 +61,7 @@ function attention_render_stars($rating)
     // Outputs semantic HTML with an SVG icon (using currentColor)
     $html = '<span class="attention-rating attention-rating-stars" data-rating="' . esc_attr($rating) . '">'
         . esc_html($formatted)
-        . ' <svg class="attention-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+        . ' <span class="attention-icon" aria-hidden="true">&#9733;</span>'
         . '</span>';
 
     return wp_kses_post($html);
@@ -75,7 +75,7 @@ function attention_render_stars($rating)
  */
 function attention_format_distance($distance)
 {
-    if (empty($distance) && $distance !== 0 && $distance !== '0') {
+    if (!is_numeric($distance) || (float) $distance < 0 || !is_finite((float) $distance)) {
         return '';
     }
 
@@ -92,13 +92,13 @@ function attention_format_distance($distance)
  */
 function attention_format_distance_icon($distance)
 {
-    if (empty($distance) && $distance !== 0 && $distance !== '0') {
+    if (!is_numeric($distance) || (float) $distance < 0 || !is_finite((float) $distance)) {
         return '';
     }
 
     $formatted = number_format_i18n(floatval($distance), 1);
     $html = '<span class="attention-distance attention-distance-icon">'
-        . '<svg class="attention-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> '
+        . '<span class="attention-icon" aria-hidden="true">&#9678;</span> '
         . esc_html($formatted) . ' mi</span>';
     return wp_kses_post($html);
 }
@@ -117,7 +117,8 @@ function attention_render_status($is_open)
         return '';
     }
 
-    $is_open_bool = filter_var($is_open, FILTER_VALIDATE_BOOLEAN);
+    $is_open_bool = filter_var($is_open, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+    if ($is_open_bool === null) { return ''; }
 
     if ($is_open_bool) {
         $label = __('Open Now', 'attention-directory');
@@ -146,8 +147,9 @@ function attention_render_categories_tags($categories)
     ob_start();
     echo '<div class="attention-category-tags">';
     foreach ($categories as $cat) {
+        if (!is_string($cat) && !is_array($cat)) { continue; }
         $cat_name = is_string($cat) ? $cat : (isset($cat['name']) ? $cat['name'] : (isset($cat['label']) ? $cat['label'] : ''));
-        if (empty($cat_name))
+        if (!is_scalar($cat_name) || $cat_name === '')
             continue;
 
         echo '<span class="attention-tag">' . esc_html($cat_name) . '</span>';
@@ -171,8 +173,9 @@ function attention_render_categories_plain($categories)
 
     $cat_names = array();
     foreach ($categories as $cat) {
+        if (!is_string($cat) && !is_array($cat)) { continue; }
         $cat_name = is_string($cat) ? $cat : (isset($cat['name']) ? $cat['name'] : (isset($cat['label']) ? $cat['label'] : ''));
-        if (!empty($cat_name)) {
+        if (is_scalar($cat_name) && $cat_name !== '') {
             $cat_names[] = esc_html($cat_name);
         }
     }

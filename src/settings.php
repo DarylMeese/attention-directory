@@ -27,13 +27,32 @@ add_action('admin_menu', 'attention_directory_add_settings_page');
  */
 function attention_directory_register_settings()
 {
-	register_setting('attention_directory_settings', 'attention_directory_base_url', 'esc_url_raw');
-	register_setting('attention_directory_settings', 'attention_directory_tenant_slug', 'sanitize_text_field');
-	register_setting('attention_directory_settings', 'attention_directory_api_key', 'sanitize_text_field');
-	register_setting('attention_directory_settings', 'attention_directory_cache_ttl', 'intval');
-	register_setting('attention_directory_settings', 'attention_directory_push_app_id', 'sanitize_text_field');
+    register_setting('attention_directory_settings', 'attention_directory_base_url', 'attention_directory_validate_base_url');
+	register_setting('attention_directory_settings', 'attention_directory_tenant_slug', 'attention_directory_validate_slug');
+	register_setting('attention_directory_settings', 'attention_directory_push_app_id', 'attention_directory_validate_push_id');
+	register_setting('attention_directory_settings', 'attention_directory_push_enabled', array('type' => 'boolean', 'sanitize_callback' => 'rest_sanitize_boolean', 'default' => false));
 }
 add_action('admin_init', 'attention_directory_register_settings');
+
+function attention_directory_validate_base_url($value) {
+    $parts = is_string($value) ? wp_parse_url($value) : false;
+    if (!$parts || ($parts['scheme'] ?? '') !== 'https' || empty($parts['host']) || isset($parts['user']) || isset($parts['pass']) || isset($parts['query']) || isset($parts['fragment'])) {
+        add_settings_error('attention_directory_base_url', 'invalid_url', __('Enter a public HTTPS API URL without credentials, query parameters or a fragment.', 'attention-directory'));
+        return get_option('attention_directory_base_url', 'https://app.attentionnetwork.net/api');
+    }
+    return rtrim(esc_url_raw($value), '/');
+}
+function attention_directory_validate_push_id($value) {
+    if ($value === '') { return ''; }
+    if (is_string($value) && preg_match('/^[A-Za-z0-9_-]{8,128}$/', $value)) { return $value; }
+    add_settings_error('attention_directory_push_app_id', 'invalid_push_id', __('Enter the Gravitec site application ID provided for this WordPress domain.', 'attention-directory'));
+    return get_option('attention_directory_push_app_id', '');
+}
+function attention_directory_validate_slug($value) {
+    if (is_string($value) && preg_match('/^[a-zA-Z0-9-]{1,191}$/', $value)) { return $value; }
+    add_settings_error('attention_directory_tenant_slug', 'invalid_site', __('Enter the site slug shown in Sites & Apps.', 'attention-directory'));
+    return get_option('attention_directory_tenant_slug', '');
+}
 
 /**
  * Render Settings Page
@@ -64,39 +83,36 @@ function attention_directory_render_settings_page()
 			?>
 			<table class="form-table">
 				<tr valign="top">
-					<th scope="row"><?php _e('API Base URL', 'attention-directory'); ?></th>
+					<th scope="row"><label for="attention-directory-base"><?php _e('API Base URL', 'attention-directory'); ?></label></th>
 					<td>
-						<input type="text" name="attention_directory_base_url"
-							value="<?php echo esc_attr(get_option('attention_directory_base_url', 'https://api.attentionnetwork.com')); ?>"
+						<input id="attention-directory-base" type="url" required name="attention_directory_base_url"
+							value="<?php echo esc_attr(get_option('attention_directory_base_url', 'https://app.attentionnetwork.net/api')); ?>"
 							class="regular-text" />
 						<p class="description">
-							<?php _e('The base URL for the Attention Network API.', 'attention-directory'); ?></p>
+							<?php _e('Use https://app.attentionnetwork.net/api. Public directory entries are refreshed on each request to honor privacy changes.', 'attention-directory'); ?></p>
 					</td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><?php _e('Tenant Slug', 'attention-directory'); ?></th>
+					<th scope="row"><label for="attention-directory-site"><?php _e('Site / App slug', 'attention-directory'); ?></label></th>
 					<td>
-						<input type="text" name="attention_directory_tenant_slug"
+						<input id="attention-directory-site" type="text" required maxlength="191" pattern="[A-Za-z0-9\-]+" name="attention_directory_tenant_slug"
 							value="<?php echo esc_attr(get_option('attention_directory_tenant_slug')); ?>"
 							class="regular-text" />
-						<p class="description"><?php _e('Your specific tenant identifier.', 'attention-directory'); ?></p>
+						<p class="description"><?php _e('Use the public link code from Publishing → Sites & Apps. This is a site identifier, not an organization UUID.', 'attention-directory'); ?></p>
 					</td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><?php _e('API Key (Bearer Token)', 'attention-directory'); ?></th>
+					<th scope="row"><?php _e('Public directory access', 'attention-directory'); ?></th>
 					<td>
-						<input type="password" name="attention_directory_api_key"
-							value="<?php echo esc_attr(get_option('attention_directory_api_key')); ?>"
-							class="regular-text" />
 						<p class="description">
-							<?php _e('Secure authentication key. This is never exposed on the frontend.', 'attention-directory'); ?>
+							<?php _e('No API key is required. Only the selected site’s public directory is available. Previously stored credentials are not displayed or sent.', 'attention-directory'); ?>
 						</p>
 					</td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><?php _e('Attention Push App ID', 'attention-directory'); ?></th>
+					<th scope="row"><label for="attention-directory-push"><?php _e('Gravitec Site / App ID', 'attention-directory'); ?></label></th>
 					<td>
-						<input type="text" name="attention_directory_push_app_id"
+						<input id="attention-directory-push" type="text" maxlength="128" pattern="[A-Za-z0-9_\-]{8,128}" name="attention_directory_push_app_id"
 							value="<?php echo esc_attr(get_option('attention_directory_push_app_id')); ?>"
 							class="regular-text" placeholder="e.g. 7f8a9b2c..." />
 						<p class="description">
@@ -105,13 +121,12 @@ function attention_directory_render_settings_page()
 					</td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><?php _e('Cache TTL (Seconds)', 'attention-directory'); ?></th>
+					<th scope="row"><?php _e('Offer push notifications', 'attention-directory'); ?></th>
 					<td>
-						<input type="number" name="attention_directory_cache_ttl"
-							value="<?php echo esc_attr(get_option('attention_directory_cache_ttl', 3600)); ?>"
-							class="small-text" />
+						<input type="hidden" name="attention_directory_push_enabled" value="0" />
+						<label><input type="checkbox" name="attention_directory_push_enabled" value="1" <?php checked(get_option('attention_directory_push_enabled', false)); ?> /> <?php esc_html_e('Enable the optional notification button', 'attention-directory'); ?></label>
 						<p class="description">
-							<?php _e('How long to cache API responses (default 3600s).', 'attention-directory'); ?></p>
+							<?php _e('Enable only after the Gravitec application and service worker are configured for this WordPress domain. Visitors choose whether to subscribe. This plugin does not create provider applications or send notifications.', 'attention-directory'); ?></p>
 					</td>
 				</tr>
 			</table>
@@ -138,8 +153,8 @@ function attention_directory_render_settings_page()
 function attention_directory_purge_all_cache()
 {
 	global $wpdb;
-	$prefix = '_transient_attn_dir_%';
+	$prefix = $wpdb->esc_like('_transient_attn_dir_') . '%';
 	$wpdb->query($wpdb->prepare("DELETE FROM $wpdb->options WHERE option_name LIKE %s", $prefix));
-	$prefix_timeout = '_transient_timeout_attn_dir_%';
+	$prefix_timeout = $wpdb->esc_like('_transient_timeout_attn_dir_') . '%';
 	$wpdb->query($wpdb->prepare("DELETE FROM $wpdb->options WHERE option_name LIKE %s", $prefix_timeout));
 }

@@ -8,6 +8,13 @@
  */
 
 :root {
+    --attention-gap: 1.5rem;
+    --attention-card-radius: 0.75rem;
+    --attention-accent: #0f172a;
+    --attention-card-bg: #fff;
+    --attention-card-border: #e2e8f0;
+    --attention-text-main: #1e293b;
+    --attention-text-muted: #64748b;
     /* Main API driven Tenant Tokens */
     --tenant-accent: #0f172a;
     --tenant-muted: #64748b;
@@ -25,6 +32,18 @@
     --tenant-tag-bg: #f1f5f9;
     --tenant-tag-text: #475569;
 }
+.attention-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)) !important; }
+.attention-card { background: var(--attention-card-bg); color: var(--attention-text-main); border-color: var(--attention-card-border) !important; border-radius: var(--attention-card-radius) !important; overflow-wrap: anywhere; }
+.attention-card p { color: var(--attention-text-muted) !important; }
+.attention-pagination { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: 1rem; }
+.attention-search-form { flex-wrap: wrap; }
+.attention-search-form input { min-width: 0; max-width: 100%; }
+.attention-search-form button, .attention-button, .attention-pagination a, .attention-push-button { min-height: 44px; padding: .65rem 1rem; }
+.attention-directory-container a:focus-visible, .attention-search-form :focus-visible, .attention-push-button:focus-visible { outline: 3px solid var(--attention-accent); outline-offset: 3px; }
+.attention-profile { overflow-wrap: anywhere; }
+.attention-profile img, .attention-card img { max-width: 100%; height: auto; }
+.attention-push-status { display: block; margin-top: .5rem; }
+.attention-search-form .screen-reader-text { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* Base Styles */
 .attention-directory-container {

@@ -12,6 +12,7 @@ if (!defined('ABSPATH')) {
  */
 function attention_directory_internal_request($endpoint, $params = array())
 {
+    nocache_headers();
     $request = new WP_REST_Request('GET', $endpoint);
     $request->set_query_params($params);
     return rest_do_request($request);
@@ -23,6 +24,9 @@ function attention_directory_internal_request($endpoint, $params = array())
  */
 function attention_directory_listing_shortcode($atts)
 {
+    if (isset($_GET['org_slug']) && is_string($_GET['org_slug']) && $_GET['org_slug'] !== '') {
+        return '<p><a href="' . esc_url(remove_query_arg('org_slug')) . '">' . esc_html__('Back to directory', 'attention-directory') . '</a></p>' . attention_directory_org_shortcode(array('slug' => sanitize_title(wp_unslash($_GET['org_slug']))));
+    }
     $atts = shortcode_atts(array(
         'limit' => 10,
         'class' => '',
@@ -30,6 +34,10 @@ function attention_directory_listing_shortcode($atts)
     ), $atts, 'attention_directory');
 
     $params = array('page_size' => intval($atts['limit']));
+    foreach (array('q', 'category', 'city', 'state', 'zip', 'postal_code', 'sort', 'lat', 'lng', 'radius_mi') as $filter) {
+        if (isset($_GET[$filter]) && is_scalar($_GET[$filter])) { $params[$filter] = sanitize_text_field(wp_unslash($_GET[$filter])); }
+    }
+    if (isset($_GET['attn_page']) && is_scalar($_GET['attn_page'])) { $params['page'] = sanitize_text_field(wp_unslash($_GET['attn_page'])); }
     if (!empty($atts['category'])) {
         $params['category'] = sanitize_text_field($atts['category']);
     }
@@ -74,6 +82,13 @@ function attention_directory_listing_shortcode($atts)
                 </div>
             <?php endforeach; ?>
         </div>
+        <?php if (!empty($data['paging']['total_pages']) && (int) $data['paging']['total_pages'] > 1): ?>
+        <nav class="attention-pagination" aria-label="<?php echo esc_attr__('Directory pages', 'attention-directory'); ?>">
+            <?php if (!empty($data['paging']['has_prev'])): ?><a href="<?php echo esc_url(add_query_arg('attn_page', max(1, (int) $data['paging']['page'] - 1))); ?>"><?php esc_html_e('Previous', 'attention-directory'); ?></a><?php endif; ?>
+            <span><?php echo esc_html(sprintf(__('Page %1$d of %2$d', 'attention-directory'), $data['paging']['page'], $data['paging']['total_pages'])); ?></span>
+            <?php if (!empty($data['paging']['has_next'])): ?><a href="<?php echo esc_url(add_query_arg('attn_page', (int) $data['paging']['page'] + 1)); ?>"><?php esc_html_e('Next', 'attention-directory'); ?></a><?php endif; ?>
+        </nav>
+        <?php endif; ?>
     </div>
     <?php
     return ob_get_clean();
@@ -93,8 +108,8 @@ function attention_directory_org_shortcode($atts)
 
     // Default to the org_slug in the URL if no slug is provided by the shortcode
     $slug = $atts['slug'];
-    if (empty($slug) && isset($_GET['org_slug'])) {
-        $slug = sanitize_title($_GET['org_slug']);
+    if (empty($slug) && isset($_GET['org_slug']) && is_scalar($_GET['org_slug'])) {
+        $slug = sanitize_title(wp_unslash($_GET['org_slug']));
     }
 
     if (empty($slug)) {
@@ -205,7 +220,7 @@ function attention_directory_categories_shortcode($atts)
                 continue;
             ?>
             <li>
-                <a href="<?php echo esc_url(home_url('/category/' . $cat_slug)); ?>"
+                <a href="<?php echo esc_url(add_query_arg(array('category' => $cat_slug, 'attn_page' => 1))); ?>"
                     style="display: block; padding: 0.5rem 1rem; border: 1px solid #ccc; border-radius: 999px; text-decoration: none; color: inherit;">
                     <?php echo esc_html($cat_label); ?>
                 </a>
@@ -228,13 +243,14 @@ function attention_directory_search_shortcode($atts)
         'placeholder' => __('Search directory...', 'attention-directory'),
     ), $atts, 'attention_search');
 
-    $current_q = isset($_GET['q']) ? sanitize_text_field(wp_unslash($_GET['q'])) : '';
+    $current_q = isset($_GET['q']) && is_scalar($_GET['q']) ? sanitize_text_field(wp_unslash($_GET['q'])) : '';
 
     ob_start();
     ?>
     <form method="get" class="attention-search-form <?php echo esc_attr($atts['class']); ?>"
         style="display: flex; gap: 0.5rem;">
-        <input type="text" name="q" placeholder="<?php echo esc_attr($atts['placeholder']); ?>"
+        <label class="screen-reader-text" for="<?php echo esc_attr($search_id = wp_unique_id('attention-search-')); ?>"><?php esc_html_e('Search the directory', 'attention-directory'); ?></label>
+        <input type="search" id="<?php echo esc_attr($search_id); ?>" name="q" maxlength="100" placeholder="<?php echo esc_attr($atts['placeholder']); ?>"
             value="<?php echo esc_attr($current_q); ?>" style="flex: 1; padding: 0.5rem;" />
         <button type="submit" class="button"
             style="padding: 0.5rem 1rem;"><?php esc_html_e('Search', 'attention-directory'); ?></button>
@@ -243,6 +259,7 @@ function attention_directory_search_shortcode($atts)
     return ob_get_clean();
 }
 add_shortcode('attention_search', 'attention_directory_search_shortcode');
+add_shortcode('attention_directory_search', 'attention_directory_search_shortcode');
 
 /**
  * [attention_push_prompt]
@@ -256,16 +273,17 @@ function attention_directory_push_prompt_shortcode($atts)
     ), $atts, 'attention_push_prompt');
 
     $push_app_id = get_option('attention_directory_push_app_id');
-    if (empty($push_app_id)) {
+    if (empty($push_app_id) || !get_option('attention_directory_push_enabled', false)) {
         return '';
     }
 
     ob_start();
     ?>
     <div class="attention-push-wrap <?php echo esc_attr($atts['class']); ?>" style="display: inline-block;">
-        <button type="button" class="button attention-push-button" onclick="if(window.Gravitec){window.Gravitec.push(['prompt']);}else{alert('Notification service initializing...');}" style="display: inline-flex; align-items: center; gap: 8px;">
+        <button type="button" class="button attention-push-button" style="display: inline-flex; align-items: center; gap: 8px;">
             <span>🔔</span> <?php echo esc_html($atts['button_text']); ?>
         </button>
+        <span class="attention-push-status" role="status" aria-live="polite"></span>
     </div>
     <?php
     return ob_get_clean();

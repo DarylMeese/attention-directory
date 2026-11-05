@@ -37,13 +37,15 @@ class Attention_Directory_Block_Bindings
     {
         // Find the slug from the block context, fallback to query arg if single page
         $slug = null;
-        if (isset($block_instance->context['attentionOrganizationSlug'])) {
+        if (isset($source_args['slug'])) {
+            $slug = $source_args['slug'];
+        } elseif (isset($block_instance->context['attentionOrganizationSlug'])) {
             $slug = $block_instance->context['attentionOrganizationSlug'];
-        } elseif (isset($_GET['org_slug'])) {
+        } elseif (isset($_GET['org_slug']) && is_scalar($_GET['org_slug'])) {
             $slug = sanitize_text_field(wp_unslash($_GET['org_slug']));
         }
 
-        if (empty($slug)) {
+        if (!is_string($slug) || !preg_match('/^[a-zA-Z0-9-]{1,191}$/', $slug)) {
             return null;
         }
 
@@ -85,9 +87,15 @@ class Attention_Directory_Block_Bindings
                 return isset($item['logoUrl']) ? esc_url($item['logoUrl']) : null;
             case 'rating_average':
                 return isset($item['ratingAverage']) ? number_format((float) $item['ratingAverage'], 1) : null;
+            case 'rating_count':
+                return isset($item['ratingCount']) ? (string) $item['ratingCount'] : null;
+            case 'website_url':
+                return isset($item['websiteUrl']) ? esc_url($item['websiteUrl']) : null;
+            case 'status_label':
+                return isset($item['status_label']) ? esc_html($item['status_label']) : null;
             default:
-                // Allow dynamic dot-notation accessing if needed later
-                return isset($item[$field]) ? esc_html($item[$field]) : null;
+                // Only explicitly supported fields can be bound; arrays are never coerced into text.
+                return null;
         }
     }
 }
