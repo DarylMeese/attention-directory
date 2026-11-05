@@ -4,7 +4,7 @@ Tags: directory, organizations, rbac, api
 Requires at least: 6.5
 Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 
 Secure, stylable directory system integrated with Attention Network API.
@@ -34,6 +34,10 @@ The plugin uses CSS variables. You can override them in your theme's Customizer 
 Use JetEngine's REST API listing connection with `/wp-json/attention/v1/organizations` and items path `items`. See JETENGINE_INTEGRATION.md. Native builder acceptance depends on the installed version.
 
 == Changelog ==
+
+= 1.1.1 =
+* Keep directory cards readable when a host theme changes the root font size.
+* Omit empty contact panels from business profiles.
 
 = 1.1.0 =
 * Adapt canonical profile/category/collection payloads and public card fields.
